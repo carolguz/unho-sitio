@@ -303,11 +303,15 @@ const UNHO = {
     const rows = await this.leerTab('Galeria');
     if (rows.length === 0) { this.vacio(list, 'Sin fotos en la hoja aun.'); return; }
     list.innerHTML = rows.map((f, i) => {
-      const src = this.driveImg(f.imagenUrl, 120);
+      const links = (f.imagenUrl || '').split(',').map(s => s.trim()).filter(Boolean);
+      const src = links.length ? this.driveImg(links[0], 120) : '';
+      const cuenta = links.length > 1 ? (' (' + links.length + ' fotos)') : '';
       return '<div class="li-item" style="align-items:flex-start;gap:14px;">' +
-        '<div style="width:80px;height:65px;border-radius:8px;overflow:hidden;background:#f0f0f0;flex-shrink:0;">' +
-        (src ? '<img src="' + src + '" style="width:100%;height:100%;object-fit:cover;">' : '') + '</div>' +
-        '<div style="flex:1;min-width:0;"><h4>' + (f.descripcion || 'Sin descripcion') + '</h4><p>Imagen de Google Drive</p></div>' +
+        '<div style="width:80px;height:65px;border-radius:8px;overflow:hidden;background:#f0f0f0;flex-shrink:0;position:relative;">' +
+        (src ? '<img src="' + src + '" style="width:100%;height:100%;object-fit:cover;">' : '') +
+        (links.length > 1 ? '<span style="position:absolute;bottom:2px;right:2px;background:rgba(0,0,0,0.7);color:#fff;font-size:10px;padding:1px 5px;border-radius:6px;">+' + (links.length - 1) + '</span>' : '') +
+        '</div>' +
+        '<div style="flex:1;min-width:0;"><h4>' + (f.descripcion || 'Sin descripcion') + cuenta + '</h4><p>Album de Google Drive</p></div>' +
         this.botonEliminar('Galeria', f._row || (i + 2)) + '</div>';
     }).join('');
   },
@@ -327,8 +331,9 @@ const UNHO = {
   previewGalFoto() {
     const v = this.val('inp-gal-drive');
     if (!v) { alert('Pega el enlace o ID de Drive'); return; }
+    const primero = v.split(',')[0].trim();
     const img = document.getElementById('gal-prev-img'); const box = document.getElementById('gal-foto-preview');
-    if (img) img.src = this.driveImg(v, 400); if (box) box.style.display = 'flex';
+    if (img) img.src = this.driveImg(primero, 400); if (box) box.style.display = 'flex';
   },
 
   // ════════ PARTICIPA (fija) ════════

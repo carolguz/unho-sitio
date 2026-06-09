@@ -1257,6 +1257,7 @@ async function loadFromSheets() {
   if (galeria.length > 0) {
     window._sheetGaleria = galeria.map(r => ({
       descripcion: r.descripcion || "",
+      imagenUrlRaw: r.imagenUrl || "",
       imageUrl: driveImg(r.imagenUrl, 1000),
       driveId: "",
       base64: ""
@@ -1445,31 +1446,44 @@ function renderGaleria() {
   const grid = document.getElementById("galeria-grid");
   const empty = document.getElementById("galeria-empty");
   if (!grid) return;
-  const savedGal = [];
-  const sheetGal = (window._sheetGaleria || []).map(f => ({ descripcion: f.descripcion, base64: "", driveId: "", imageUrl: f.imageUrl || "" }));
-  const fotos = [...sheetGal];
-  if (fotos.length === 0) { grid.style.display = "none"; empty.style.display = "block"; return; }
+  const sheetGal = (window._sheetGaleria || []);
+  // Cada item = un album. Separamos los links por coma.
+  const albumes = sheetGal.map(f => {
+    const links = (f.imagenUrlRaw || "").split(",").map(s => s.trim()).filter(Boolean);
+    const fotos = links.map(l => driveImg(l, 1200)).filter(Boolean);
+    return { descripcion: f.descripcion || "", fotos: fotos };
+  }).filter(a => a.fotos.length > 0);
+
+  if (albumes.length === 0) { grid.style.display = "none"; empty.style.display = "block"; return; }
   grid.style.display = "grid"; empty.style.display = "none";
   grid.innerHTML = "";
-  fotos.forEach((f, i) => {
-    const src = f.base64 || f.imageUrl || (f.driveId ? "https://lh3.googleusercontent.com/d/" + f.driveId : "");
+
+  albumes.forEach((album) => {
+    const portada = album.fotos[0];
     const card = document.createElement("div");
     card.style.cssText = "background:white;border-radius:16px;overflow:hidden;border:1px solid rgba(28,60,110,0.1);box-shadow:0 4px 16px rgba(28,60,110,0.07);cursor:pointer;transition:transform 0.2s;";
     card.onmouseover = () => card.style.transform = "translateY(-4px)";
     card.onmouseout = () => card.style.transform = "";
-    card.onclick = () => abrirFoto(src, f.descripcion || "");
+    card.onclick = () => abrirAlbum(album.fotos, album.descripcion, 0);
     const imgDiv = document.createElement("div");
-    imgDiv.style.cssText = "height:220px;overflow:hidden;background:#f0f0f0;display:flex;align-items:center;justify-content:center;";
-    if (src) {
+    imgDiv.style.cssText = "height:220px;overflow:hidden;background:#f0f0f0;display:flex;align-items:center;justify-content:center;position:relative;";
+    if (portada) {
       const img = document.createElement("img");
-      img.src = src; img.style.cssText = "width:100%;height:100%;object-fit:cover;";
+      img.src = portada; img.style.cssText = "width:100%;height:100%;object-fit:cover;";
       imgDiv.appendChild(img);
     }
+    // Insignia con la cantidad de fotos (solo si es album)
+    if (album.fotos.length > 1) {
+      const badge = document.createElement("div");
+      badge.innerHTML = "&#128247; " + album.fotos.length + " fotos";
+      badge.style.cssText = "position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.65);color:white;font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;";
+      imgDiv.appendChild(badge);
+    }
     card.appendChild(imgDiv);
-    if (f.descripcion) {
+    if (album.descripcion) {
       const desc = document.createElement("div");
       desc.style.cssText = "padding:12px 14px;";
-      desc.innerHTML = "<p style='font-size:13px;font-weight:600;color:#1C3C6E;line-height:1.5;'>" + f.descripcion + "</p>";
+      desc.innerHTML = "<p style='font-size:13px;font-weight:600;color:#1C3C6E;line-height:1.5;'>" + album.descripcion + "</p>";
       card.appendChild(desc);
     }
     grid.appendChild(card);
@@ -1477,22 +1491,61 @@ function renderGaleria() {
 }
 renderGaleria();
 
-function abrirFoto(src, desc) {
-  if (!src) return;
+// Abre un album con flechitas para pasar fotos
+function abrirAlbum(fotos, desc, startIndex) {
+  if (!fotos || fotos.length === 0) return;
+  let idx = startIndex || 0;
+
   const overlay = document.createElement("div");
   overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;";
-  const btn = document.createElement("button");
-  btn.innerHTML = "&#x2715;";
-  btn.style.cssText = "position:absolute;top:20px;right:24px;background:none;border:none;color:white;font-size:2rem;cursor:pointer;";
-  btn.onclick = () => overlay.remove();
+
+  const btnCerrar = document.createElement("button");
+  btnCerrar.innerHTML = "&#x2715;";
+  btnCerrar.style.cssText = "position:absolute;top:20px;right:24px;background:none;border:none;color:white;font-size:2rem;cursor:pointer;z-index:2;";
+  btnCerrar.onclick = () => overlay.remove();
+
   const img = document.createElement("img");
-  img.src = src;
-  img.style.cssText = "max-width:90%;max-height:80vh;object-fit:contain;border-radius:12px;";
-  overlay.appendChild(btn);
+  img.style.cssText = "max-width:88%;max-height:78vh;object-fit:contain;border-radius:12px;";
+
+  const pDesc = document.createElement("p");
+  pDesc.style.cssText = "color:rgba(255,255,255,0.85);margin-top:1rem;font-size:14px;text-align:center;max-width:600px;";
+
+  const contador = document.createElement("p");
+  contador.style.cssText = "color:rgba(255,255,255,0.6);margin-top:6px;font-size:12px;";
+
+  function mostrar() {
+    img.src = fotos[idx];
+    pDesc.textContent = desc || "";
+    contador.textContent = (idx + 1) + " / " + fotos.length;
+  }
+
+  // Flechas (solo si hay mas de una foto)
+  if (fotos.length > 1) {
+    const prev = document.createElement("button");
+    prev.innerHTML = "&#10094;";
+    prev.style.cssText = "position:absolute;left:18px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.15);border:none;color:white;font-size:2rem;cursor:pointer;border-radius:50%;width:54px;height:54px;display:flex;align-items:center;justify-content:center;";
+    prev.onclick = (e) => { e.stopPropagation(); idx = (idx - 1 + fotos.length) % fotos.length; mostrar(); };
+    const next = document.createElement("button");
+    next.innerHTML = "&#10095;";
+    next.style.cssText = "position:absolute;right:18px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.15);border:none;color:white;font-size:2rem;cursor:pointer;border-radius:50%;width:54px;height:54px;display:flex;align-items:center;justify-content:center;";
+    next.onclick = (e) => { e.stopPropagation(); idx = (idx + 1) % fotos.length; mostrar(); };
+    overlay.appendChild(prev);
+    overlay.appendChild(next);
+  }
+
+  overlay.appendChild(btnCerrar);
   overlay.appendChild(img);
-  if (desc) { const p = document.createElement("p"); p.textContent = desc; p.style.cssText = "color:rgba(255,255,255,0.8);margin-top:1rem;font-size:14px;text-align:center;max-width:500px;"; overlay.appendChild(p); }
+  overlay.appendChild(pDesc);
+  overlay.appendChild(contador);
   overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
   document.body.appendChild(overlay);
+  mostrar();
+}
+
+// Compatibilidad: abrirFoto (una sola foto) sigue funcionando
+function abrirFoto(src, desc) {
+  if (!src) return;
+  abrirAlbum([src], desc, 0);
 }
 
 // ── PARTICIPA ──
