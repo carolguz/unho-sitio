@@ -67,7 +67,7 @@ const UNHO = {
     if (name === 'galeria')    this.renderGaleria();
     if (name === 'participa')  this.renderParticipa();
     if (name === 'contacto')   this.renderContacto();
-    if (name === 'inicio')     this.renderPortada();
+    if (name === 'inicio')     { this.renderPortada(); this.renderNosotros(); }
   },
 
   // ════════ COMUNICACION CON EL PUENTE ════════
@@ -378,6 +378,35 @@ const UNHO = {
     const box = document.getElementById('hero-bg-preview');
     if (img) img.src = this.driveImg(v, 800);
     if (box) box.style.display = 'block';
+  },
+
+  // ════════ NOSOTROS (Quienes somos) ════════
+  async renderNosotros() {
+    const rows = await this.leerTab('Nosotros');
+    const n = (rows && rows[0]) ? rows[0] : {};
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+    set('inp-nosotros-p1', n.parrafo1);
+    set('inp-nosotros-p2', n.parrafo2);
+    set('inp-caja1-titulo', n.caja1titulo);
+    set('inp-caja1-texto', n.caja1texto);
+    set('inp-caja2-titulo', n.caja2titulo);
+    set('inp-caja2-texto', n.caja2texto);
+    set('inp-caja3-titulo', n.caja3titulo);
+    set('inp-caja3-texto', n.caja3texto);
+  },
+  async saveNosotros() {
+    const fila = {
+      parrafo1: this.val('inp-nosotros-p1'),
+      parrafo2: this.val('inp-nosotros-p2'),
+      caja1titulo: this.val('inp-caja1-titulo'),
+      caja1texto: this.val('inp-caja1-texto'),
+      caja2titulo: this.val('inp-caja2-titulo'),
+      caja2texto: this.val('inp-caja2-texto'),
+      caja3titulo: this.val('inp-caja3-titulo'),
+      caja3texto: this.val('inp-caja3-texto')
+    };
+    await this.enviar({ accion: 'guardar', pestana: 'Nosotros', fila });
+    this.showMsg('msg-nosotros');
   },
 
   // ════════ CONTACTO ════════

@@ -765,44 +765,29 @@ footer p{font-size:13px;line-height:1.85;max-width:460px;margin:0 auto;}
       <div class="sec-label">Quienes somos</div>
       <h2 class="sec-title">Nuestra historia</h2>
 
-      <div class="qs-grid">
+      <div class="qs-grid" style="display:block;">
         <div>
           <p style="font-size:13px;font-weight:900;color:var(--navy);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem;">Dedicacion y servicio</p>
-          <p style="font-size:15px;color:var(--gray);line-height:1.9;margin-bottom:1.25rem;">
+          <p id="nosotros-p1" style="font-size:15px;color:var(--gray);line-height:1.9;margin-bottom:1.25rem;">
             Las multiples necesidades que afectan el bienestar de los ninos y ninas, adolescentes, mujeres, hombres y comunidades, hizo que un grupo multidisciplinario se organizara para atender a los grupos mas vulnerables denominandose asi <strong style="color:var(--navy);">"Unidos por un Nuevo Horizonte —UNHO"</strong>, porque confian que a traves de estrategias de accion enfocado a las necesidades no satisfechas de los grupos vulnerables pueden mejorar la calidad de vida, uniendose a dar una oportunidad de cambio e igualdad de derechos.
           </p>
-          <p style="font-size:15px;color:var(--gray);line-height:1.9;">
+          <p id="nosotros-p2" style="font-size:15px;color:var(--gray);line-height:1.9;">
             Desde finales del ano 2023, nos enorgullece ser testigos de como nuestras actividades han beneficiado a la comunidad de Chimaltenango y muchos mas. <strong style="color:var(--navy);">¿Quieres participar?</strong> Contribuye a nuestro trabajo mediante una donacion o como voluntario(a) hoy mismo.
           </p>
 
           <div class="vals" style="margin-top:2rem;">
             <div class="val">
               <div class="val-ico"><svg width="18" height="18" fill="none" stroke="#32CD32" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
-              <div class="val-txt"><h4>Compromiso comunitario</h4><p>Trabajamos de la mano con las comunidades para entender sus necesidades reales.</p></div>
+              <div class="val-txt"><h4 id="val1-titulo">Compromiso comunitario</h4><p id="val1-desc">Trabajamos de la mano con las comunidades para entender sus necesidades reales.</p></div>
             </div>
             <div class="val">
               <div class="val-ico"><svg width="18" height="18" fill="none" stroke="#32CD32" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-              <div class="val-txt"><h4>Desarrollo sostenible</h4><p>Creamos soluciones que perduran en el tiempo y generan impacto duradero.</p></div>
+              <div class="val-txt"><h4 id="val2-titulo">Desarrollo sostenible</h4><p id="val2-desc">Creamos soluciones que perduran en el tiempo y generan impacto duradero.</p></div>
             </div>
             <div class="val">
               <div class="val-ico"><svg width="18" height="18" fill="none" stroke="#32CD32" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-              <div class="val-txt"><h4>Transparencia</h4><p>Rendimos cuentas con informacion clara y honesta a donantes y comunidad.</p></div>
+              <div class="val-txt"><h4 id="val3-titulo">Transparencia</h4><p id="val3-desc">Rendimos cuentas con informacion clara y honesta a donantes y comunidad.</p></div>
             </div>
-          </div>
-        </div>
-
-        <!-- FOTO UNHO -->
-        <div>
-          <div class="qs-foto-box">
-            <div class="qs-foto-placeholder">
-              <svg width="52" height="52" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-              <p>Foto de UNHO</p>
-              <span>Reemplaza este bloque con<br>&lt;img src="tu-foto.jpg"&gt;</span>
-            </div>
-          </div>
-          <div class="qs-foto-caption">
-            <strong>Unidos por un Nuevo Horizonte</strong>
-            <p>La Alameda, Chimaltenango, Guatemala — desde 2023</p>
           </div>
         </div>
       </div>
@@ -1178,7 +1163,7 @@ function driveImg(value, width) {
 
 // Load all sheets on startup
 async function loadFromSheets() {
-  const [noticias, proyectos, empleos, conv, equipo, galeria, contacto, portada] = await Promise.all([
+  const [noticias, proyectos, empleos, conv, equipo, galeria, contacto, portada, nosotros] = await Promise.all([
     fetchSheet("Noticias"),
     fetchSheet("proyectos"),
     fetchSheet("Empleos"),
@@ -1186,11 +1171,13 @@ async function loadFromSheets() {
     fetchSheet("Equipo"),
     fetchSheet("Galeria"),
     fetchSheet("Contacto"),
-    fetchSheet("Portada")
+    fetchSheet("Portada"),
+    fetchSheet("Nosotros")
   ]);
 
   if (contacto && contacto.length > 0) { window._sheetContacto = contacto[0]; aplicarContacto(); }
   if (portada && portada.length > 0) { window._sheetPortada = portada[0]; aplicarPortada(); }
+  if (nosotros && nosotros.length > 0) { window._sheetNosotros = nosotros[0]; aplicarNosotros(); }
 
   if (noticias.length > 0) {
     // Map sheet columns to app format
@@ -1305,6 +1292,33 @@ function aplicarContacto() {
   if (fb && c.facebook) fb.href = c.facebook;
   const tk = document.getElementById('contacto-tiktok');
   if (tk && c.tiktok) tk.href = c.tiktok;
+}
+
+// ── Aplica los textos de Nosotros desde la hoja ──
+function aplicarNosotros() {
+  const n = window._sheetNosotros || {};
+  const set = (id, txt) => { if (txt) { const el = document.getElementById(id); if (el) el.textContent = txt; } };
+  // Parrafos con negrita azul automatica en frases clave
+  const resaltar = (id, txt) => {
+    if (!txt) return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    const frases = ['"Unidos por un Nuevo Horizonte —UNHO"', '"Unidos por un Nuevo Horizonte -UNHO"', '¿Quieres participar?'];
+    let html = txt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    frases.forEach(f => {
+      const fEsc = f.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      html = html.split(fEsc).join('<strong style="color:var(--navy);">' + fEsc + '</strong>');
+    });
+    el.innerHTML = html;
+  };
+  resaltar('nosotros-p1', n.parrafo1);
+  resaltar('nosotros-p2', n.parrafo2);
+  set('val1-titulo', n.caja1titulo);
+  set('val1-desc', n.caja1texto);
+  set('val2-titulo', n.caja2titulo);
+  set('val2-desc', n.caja2texto);
+  set('val3-titulo', n.caja3titulo);
+  set('val3-desc', n.caja3texto);
 }
 
 // ── Aplica los datos de Portada desde la hoja ──

@@ -398,6 +398,39 @@ body { font-family:"Nunito",sans-serif; min-height:100vh; background:linear-grad
         <button class="btn-save" onclick="UNHO.saveHeroBg()">Guardar foto de fondo</button>
         <div class="msg-ok" id="msg-hero-bg">Foto de fondo actualizada</div>
       </div>
+
+      <div class="box">
+        <div class="box-title">Seccion "Quienes somos / Nuestra historia"</div>
+        <p style="font-size:12px;color:var(--gray);margin-bottom:1rem;">Edita los dos parrafos de la seccion Acerca de Nosotros.</p>
+        <div class="fg2" style="margin-bottom:14px;">
+          <label>Primer parrafo</label>
+          <textarea id="inp-nosotros-p1" style="min-height:120px;" placeholder="Las multiples necesidades que afectan el bienestar..."></textarea>
+        </div>
+        <div class="fg2" style="margin-bottom:14px;">
+          <label>Segundo parrafo</label>
+          <textarea id="inp-nosotros-p2" style="min-height:100px;" placeholder="Desde finales del ano 2023, nos enorgullece..."></textarea>
+        </div>
+
+        <div style="border-top:1px solid var(--border);margin:18px 0;padding-top:16px;">
+          <p style="font-size:12px;font-weight:800;color:var(--navy);margin-bottom:14px;text-transform:uppercase;letter-spacing:0.06em;">Las 3 cajitas</p>
+
+          <div class="r2">
+            <div class="fg2"><label>Caja 1 - Titulo</label><input type="text" id="inp-caja1-titulo" placeholder="Compromiso comunitario"></div>
+            <div class="fg2"><label>Caja 1 - Texto</label><input type="text" id="inp-caja1-texto" placeholder="Trabajamos de la mano con las comunidades..."></div>
+          </div>
+          <div class="r2">
+            <div class="fg2"><label>Caja 2 - Titulo</label><input type="text" id="inp-caja2-titulo" placeholder="Desarrollo sostenible"></div>
+            <div class="fg2"><label>Caja 2 - Texto</label><input type="text" id="inp-caja2-texto" placeholder="Creamos soluciones que perduran..."></div>
+          </div>
+          <div class="r2">
+            <div class="fg2"><label>Caja 3 - Titulo</label><input type="text" id="inp-caja3-titulo" placeholder="Transparencia"></div>
+            <div class="fg2"><label>Caja 3 - Texto</label><input type="text" id="inp-caja3-texto" placeholder="Rendimos cuentas con informacion clara..."></div>
+          </div>
+        </div>
+
+        <button class="btn-save" onclick="UNHO.saveNosotros()">Guardar textos</button>
+        <div class="msg-ok" id="msg-nosotros">Textos actualizados</div>
+      </div>
     </div>
 
     <!-- PROYECTOS -->
@@ -708,6 +741,6 @@ body { font-family:"Nunito",sans-serif; min-height:100vh; background:linear-grad
 </div><!-- /dash -->
 </div><!-- /dashboard -->
 
-<script src="admin.js?v=13"></script>
+<script src="admin.js?v=15"></script>
 </body>
 </html>
